@@ -49,7 +49,8 @@ import { HttpPluginNativeImpl } from 'capacitor-http'; // <-- import it via 'web
 export class Tab1Page {
   private readonly torClient = new TorClient();
 
-  httpReply: any
+  httpReply1: any
+  httpReply2: any
 
   constructor() {
   }
@@ -58,10 +59,21 @@ export class Tab1Page {
   }
 
   async testHttplient() {
-    this.httpReply = await HttpPluginNativeImpl.request({
+    this.httpReply1 = await HttpPluginNativeImpl.request({
       url: 'http://jsonplaceholder.typicode.com/todos/1',
       method: 'GET',
     }).then(JSON.stringify),
+
+    // Can be used with SOCKS5/SOCKS4/HTTP proxies.
+    this.httpReply2 = await HttpPluginNativeImpl.request({
+      url: 'http://fm6q2a2azyh5u2byw2rqh3ixmdnmmedtudsdit5fym3lqypevvli52yd.onion:5959/version',
+      method: 'GET',
+      proxy: {
+          host: 'localhost',
+          port: 59590,
+          protocol: 'SOCKS'
+      }
+    }).then(JSON.stringify);
   }
 }
 ```
