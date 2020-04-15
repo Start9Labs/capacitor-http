@@ -1,7 +1,17 @@
-import { WebPlugin } from '@capacitor/core';
-import { HttpPluginPlugin } from './definitions';
+import { WebPlugin, Plugins } from '@capacitor/core';
+import { HttpPluginContract,
+         HttpOptions,
+         HttpResponse,
+         HttpSetCookieOptions,
+         HttpGetCookiesOptions,
+         HttpGetCookiesResult,
+         HttpDeleteCookieOptions, 
+         HttpClearCookiesOptions 
+        } from './definitions';
+const { HttpPlugin } = Plugins
 
-export class HttpPluginWeb extends WebPlugin implements HttpPluginPlugin {
+
+export class HttpPluginWeb extends WebPlugin implements HttpPluginContract {
   constructor() {
     super({
       name: 'HttpPlugin',
@@ -9,15 +19,55 @@ export class HttpPluginWeb extends WebPlugin implements HttpPluginPlugin {
     });
   }
 
-  async echo(options: { value: string }): Promise<{value: string}> {
-    console.log('ECHO', options);
-    return options;
+  async request(_: HttpOptions): Promise<HttpResponse> {
+    throw new Error('request unimplimented for web')
+  }
+  async setCookie(_: HttpSetCookieOptions): Promise<void> {
+    throw new Error('setCookie unimplimented for web')
+  }
+  async getCookies(_: HttpGetCookiesOptions): Promise<HttpGetCookiesResult> {
+    throw new Error('getCookies unimplimented for web')
+  }
+  async deleteCookie(_: HttpDeleteCookieOptions): Promise<void> {
+    throw new Error('deleteCookie unimplimented for web')
+  }
+  async clearCookies(_: HttpClearCookiesOptions): Promise<void> {
+    throw new Error('clearCookies unimplimented for web')
   }
 }
 
-const HttpPlugin = new HttpPluginWeb();
+export class HttpPluginNative extends WebPlugin implements HttpPluginContract {
+  constructor() {
+    super({
+      name: 'HttpPluginNative',
+      platforms: ['web']
+    });
+  }
 
-export { HttpPlugin };
+  async request(options: HttpOptions): Promise<HttpResponse> {
+    return HttpPlugin.request(options)
+  }
+  async setCookie(options: HttpSetCookieOptions): Promise<void> {
+    return HttpPlugin.setCookie(options)
+  }
+  async getCookies(options: HttpGetCookiesOptions): Promise<HttpGetCookiesResult> {
+    return HttpPlugin.getCookies(options)
+  }
+  async deleteCookie(options: HttpDeleteCookieOptions): Promise<void> {
+    return HttpPlugin.deleteCookie(options)
+  }
+  async clearCookies(options: HttpClearCookiesOptions): Promise<void> {
+    return HttpPlugin.clearCookies(options)
+  }
+}
 
+const HttpPluginWebImpl = new HttpPluginWeb();
+const HttpPluginNativeImpl = new HttpPluginNative();
+
+export { HttpPluginWebImpl, HttpPluginNativeImpl };
 import { registerWebPlugin } from '@capacitor/core';
-registerWebPlugin(HttpPlugin);
+
+registerWebPlugin(HttpPluginWebImpl);
+registerWebPlugin(HttpPluginNativeImpl);
+
+
