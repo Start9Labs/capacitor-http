@@ -1,6 +1,6 @@
 {
   "name": "capacitor-http",
-  "version": "0.0.2",
+  "version": "octet-debug",
   "description": "http plugin with socks + http proxy support",
   "main": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
