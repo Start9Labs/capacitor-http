@@ -211,11 +211,12 @@ public class HttpPlugin: CAPPlugin {
     
     let contentType = response.allHeaderFields["Content-Type"] as? String
 
+    if data != nil {
+      print(data)
+    }
+
     if data != nil && contentType != nil && contentType!.contains("application/json") {
       if let json = try? JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as? [String: Any] {
-        print("Got json")
-        print(json)
-          // handle json...
         ret["data"] = json
       }
     } else {
