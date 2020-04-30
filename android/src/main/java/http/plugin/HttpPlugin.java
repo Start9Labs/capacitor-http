@@ -393,8 +393,13 @@ public class HttpPlugin extends Plugin {
 
         if (contentType != null) {
             if (contentType.contains("application/json")) {
-                JSObject jsonValue = new JSObject(builder.toString());
-                ret.put("data", jsonValue);
+                try {
+                    JSObject jsonValue = new JSObject(builder.toString());
+                    ret.put("data", jsonValue);
+                } catch (JSONException e) {
+                    JSArray jsonValue = new JSArray(builder.toString());
+                    ret.put("data", jsonValue);
+                }
             } else {
                 ret.put("data", builder.toString());
             }
