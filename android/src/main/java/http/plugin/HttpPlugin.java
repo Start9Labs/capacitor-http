@@ -12,6 +12,7 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.PluginRequestCodes;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
@@ -397,7 +398,7 @@ public class HttpPlugin extends Plugin {
                     JSObject jsonValue = new JSObject(builder.toString());
                     ret.put("data", jsonValue);
                 } catch (JSONException e) {
-                    JSArray jsonValue = new JSArray(builder.toString());
+                    JSArray jsonValue = (JSArray) new JSONArray(builder.toString());
                     ret.put("data", jsonValue);
                 }
             } else {
