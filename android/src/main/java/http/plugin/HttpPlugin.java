@@ -398,7 +398,7 @@ public class HttpPlugin extends Plugin {
                     JSObject jsonValue = new JSObject(builder.toString());
                     ret.put("data", jsonValue);
                 } catch (JSONException e) {
-                    JSArray jsonValue = (JSArray) new JSONArray(builder.toString());
+                    JSONArray jsonValue = new JSONArray(builder.toString());
                     ret.put("data", jsonValue);
                 }
             } else {
