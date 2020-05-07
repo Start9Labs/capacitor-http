@@ -77,8 +77,8 @@ public class HttpPlugin extends Plugin {
 
     private void get(PluginCall call, String urlString, String method, JSObject headers, JSObject params) {
         try {
-            Integer connectTimeout = call.getInt("connectTimeout");
-            Integer readTimeout = call.getInt("readTimeout");
+            Integer connectTimeout = call.getInt("connectTimeout") * 1000;
+            Integer readTimeout = call.getInt("readTimeout") * 1000;
 
             URL url = new URL(urlString);
 
@@ -97,8 +97,8 @@ public class HttpPlugin extends Plugin {
 
     private void mutate(PluginCall call, String urlString, String method, JSObject headers) {
         try {
-            Integer connectTimeout = call.getInt("connectTimeout");
-            Integer readTimeout = call.getInt("readTimeout");
+            Integer connectTimeout = call.getInt("connectTimeout") * 1000;
+            Integer readTimeout = call.getInt("readTimeout") * 1000;
             JSObject data = call.getObject("data");
 
             URL url = new URL(urlString);
