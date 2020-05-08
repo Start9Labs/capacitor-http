@@ -77,8 +77,14 @@ public class HttpPlugin extends Plugin {
 
     private void get(PluginCall call, String urlString, String method, JSObject headers, JSObject params) {
         try {
-            Integer connectTimeout = call.getInt("connectTimeout") * 1000;
-            Integer readTimeout = call.getInt("readTimeout") * 1000;
+            Integer connectTimeout = call.getInt("connectTimeout");
+            Integer readTimeout = call.getInt("readTimeout");
+            if (connectTimeout != null) {
+                connectTimeout *= 1000
+            }
+            if (readTimeout != null) {
+                readTimeout *= 1000
+            }
 
             URL url = new URL(urlString);
 
@@ -97,9 +103,15 @@ public class HttpPlugin extends Plugin {
 
     private void mutate(PluginCall call, String urlString, String method, JSObject headers) {
         try {
-            Integer connectTimeout = call.getInt("connectTimeout") * 1000;
-            Integer readTimeout = call.getInt("readTimeout") * 1000;
+            Integer connectTimeout = call.getInt("connectTimeout");
+            Integer readTimeout = call.getInt("readTimeout");
             JSObject data = call.getObject("data");
+            if (connectTimeout != null) {
+                connectTimeout *= 1000
+            }
+            if (readTimeout != null) {
+                readTimeout *= 1000
+            }
 
             URL url = new URL(urlString);
 
