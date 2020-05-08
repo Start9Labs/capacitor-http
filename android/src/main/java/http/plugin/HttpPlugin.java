@@ -1,8 +1,7 @@
 package http.plugin;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.util.Log;
+import java.util.concurrent.Executors;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -10,15 +9,12 @@ import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
-import com.getcapacitor.PluginRequestCodes;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,7 +23,6 @@ import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
@@ -35,6 +30,7 @@ import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import static java.net.Proxy.Type.DIRECT;
 import static java.net.Proxy.Type.HTTP;
@@ -47,7 +43,8 @@ import static java.net.Proxy.Type.SOCKS;
  */
 @NativePlugin()
 public class HttpPlugin extends Plugin {
-    CookieManager cookieManager = new CookieManager();
+    private CookieManager cookieManager = new CookieManager();
+    private ExecutorService executor = Executors.newCachedThreadPool();
 
     @Override
     public void load() {
@@ -56,26 +53,32 @@ public class HttpPlugin extends Plugin {
 
     @PluginMethod()
     public void request(PluginCall call) {
-        String url = call.getString("url");
-        String method = call.getString("method");
-        JSObject headers = call.getObject("headers");
-        JSObject params = call.getObject("params");
+        executor.execute(() -> {
+            String url = call.getString("url");
 
-        switch (method) {
-            case "GET":
-            case "HEAD":
-                get(call, url, method, headers, params);
-                return;
-            case "DELETE":
-            case "PATCH":
-            case "POST":
-            case "PUT":
-                mutate(call, url, method, headers);
-                return;
-        }
+            String method = call.getString("method");
+            JSObject headers = call.getObject("headers");
+            JSObject params = call.getObject("params");
+
+            Log.i("HttpPlugin", "Starting http " + method + " call to " + url);
+            switch (method) {
+                case "DELETE":
+                case "PATCH":
+                case "POST":
+                case "PUT":
+                    Log.i("HttpPlugin", "Finishing http " + method + " call to " + url);
+                    mutate(call, url, method, headers).respondTo(call);
+                    return;
+                case "GET":
+                case "HEAD":
+                default:
+                    Log.i("HttpPlugin", "Finishing http " + method + " call to " + url);
+                    get(call, url, method, headers, params).respondTo(call);
+            }
+        });
     }
 
-    private void get(PluginCall call, String urlString, String method, JSObject headers, JSObject params) {
+    private PluginCallResponseContent get(PluginCall call, String urlString, String method, JSObject headers, JSObject params) {
         try {
             Integer connectTimeout = call.getInt("connectTimeout");
             Integer readTimeout = call.getInt("readTimeout");
@@ -90,18 +93,15 @@ public class HttpPlugin extends Plugin {
 
             HttpURLConnection conn = makeUrlConnection(call, url, method, connectTimeout, readTimeout, headers);
 
-            buildResponse(call, conn);
-        } catch (MalformedURLException ex) {
-            call.reject("Invalid URL", ex);
-        } catch (IOException ex) {
-            call.reject("Error", ex);
+            JSObject successfulRes = buildResponse(conn);
+            return PluginCallResponseContent.success(successfulRes);
         } catch (Exception ex) {
-            call.reject("Error", ex);
+            return PluginCallResponseContent.error(ex);
         }
     }
 
 
-    private void mutate(PluginCall call, String urlString, String method, JSObject headers) {
+    private PluginCallResponseContent mutate(PluginCall call, String urlString, String method, JSObject headers) {
         try {
             Integer connectTimeout = call.getInt("connectTimeout");
             Integer readTimeout = call.getInt("readTimeout");
@@ -123,13 +123,9 @@ public class HttpPlugin extends Plugin {
 
             conn.connect();
 
-            buildResponse(call, conn);
-        } catch (MalformedURLException ex) {
-            call.reject("Invalid URL", ex);
-        } catch (IOException ex) {
-            call.reject("Error", ex);
+            return PluginCallResponseContent.success(buildResponse(conn));
         } catch (Exception ex) {
-            call.reject("Error", ex);
+            return PluginCallResponseContent.error(ex);
         }
     }
 
@@ -383,7 +379,7 @@ public class HttpPlugin extends Plugin {
         call.resolve();
     }
 
-    private void buildResponse(PluginCall call, HttpURLConnection conn) throws Exception {
+    private JSObject buildResponse(HttpURLConnection conn) throws Exception {
         int statusCode = conn.getResponseCode();
 
         JSObject ret = new JSObject();
@@ -419,8 +415,7 @@ public class HttpPlugin extends Plugin {
         } else {
             ret.put("data", builder.toString());
         }
-
-        call.resolve(ret);
+        return ret;
     }
 
     private JSArray makeResponseHeaders(HttpURLConnection conn) {
