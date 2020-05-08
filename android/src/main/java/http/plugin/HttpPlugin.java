@@ -80,10 +80,10 @@ public class HttpPlugin extends Plugin {
             Integer connectTimeout = call.getInt("connectTimeout");
             Integer readTimeout = call.getInt("readTimeout");
             if (connectTimeout != null) {
-                connectTimeout *= 1000
+                connectTimeout *= 1000;
             }
             if (readTimeout != null) {
-                readTimeout *= 1000
+                readTimeout *= 1000;
             }
 
             URL url = new URL(urlString);
@@ -107,10 +107,10 @@ public class HttpPlugin extends Plugin {
             Integer readTimeout = call.getInt("readTimeout");
             JSObject data = call.getObject("data");
             if (connectTimeout != null) {
-                connectTimeout *= 1000
+                connectTimeout *= 1000;
             }
             if (readTimeout != null) {
-                readTimeout *= 1000
+                readTimeout *= 1000;
             }
 
             URL url = new URL(urlString);
