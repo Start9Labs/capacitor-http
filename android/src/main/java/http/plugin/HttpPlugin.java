@@ -398,24 +398,9 @@ public class HttpPlugin extends Plugin {
 
         Log.d(getLogTag(), "GET request completed, got data");
 
-        String contentType = conn.getHeaderField("Content-Type");
+        ret.put("data", builder.toString());
 
-        if (contentType != null) {
-            if (contentType.contains("application/json")) {
-                try {
-                    JSObject jsonValue = new JSObject(builder.toString());
-                    ret.put("data", jsonValue);
-                } catch (JSONException e) {
-                    JSONArray jsonValue = new JSONArray(builder.toString());
-                    ret.put("data", jsonValue);
-                }
-            } else {
-                ret.put("data", builder.toString());
-            }
-        } else {
-            ret.put("data", builder.toString());
-        }
-        return ret;
+        call.resolve(ret);
     }
 
     private JSArray makeResponseHeaders(HttpURLConnection conn) {

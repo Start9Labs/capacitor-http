@@ -7,6 +7,7 @@ import AudioToolbox
 
 @objc(HttpPlugin)
 public class HttpPlugin: CAPPlugin {
+  var sessionMap: [String: URLSession] = [:]
 
   @objc public func request(_ call: CAPPluginCall) {
     guard let urlValue = call.getString("url") else {
@@ -211,17 +212,10 @@ public class HttpPlugin: CAPPlugin {
     
     let contentType = response.allHeaderFields["Content-Type"] as? String
 
-    if data != nil && contentType != nil && contentType!.contains("application/json") {
-      if let json = try? JSONSerialization.jsonObject(with: data!, options: .mutableContainers) {
-          // handle json...
-        ret["data"] = json
-      }
+    if (data != nil) {
+      ret["data"] = String(data: data!, encoding: .utf8);
     } else {
-      if (data != nil) {
-        ret["data"] = String(data: data!, encoding: .utf8);
-      } else {
-        ret["data"] = ""
-      }
+      ret["data"] = ""
     }
     
     return ret
@@ -296,31 +290,36 @@ public class HttpPlugin: CAPPlugin {
     let host = proxy["host"]! as! String
     let port = proxy["port"]! as! UInt16
     let proto: String = proxy["protocol"]! as! String
-    let cfg = URLSessionConfiguration.default
-    cfg.connectionProxyDictionary = [AnyHashable: Any]()
-    switch proto {
-      case "SOCKS":
-        cfg.connectionProxyDictionary = [
-          kCFProxyTypeKey: kCFProxyTypeSOCKS,
-          kCFStreamPropertySOCKSProxyHost: host,
-          kCFStreamPropertySOCKSProxyPort: port
-        ]
-        if #available(iOSApplicationExtension 13.0, *), #available(iOS 13.0, *) {
-          cfg.tlsMaximumSupportedProtocolVersion = .TLSv12
-        } else {
-          cfg.tlsMinimumSupportedProtocol = .tlsProtocol12
-        }
-        return URLSession.init(configuration: cfg)
-      case "HTTP":
-        cfg.connectionProxyDictionary = [
+    if let session = sessionMap["\(host)\(port)\(proto)"] {
+      return session
+    } else {
+      let cfg = URLSessionConfiguration.default
+      cfg.connectionProxyDictionary = [AnyHashable: Any]()
+      switch proto {
+        case "SOCKS":
+          cfg.connectionProxyDictionary = [
+            kCFProxyTypeKey: kCFProxyTypeSOCKS,
+            kCFStreamPropertySOCKSProxyHost: host,
+            kCFStreamPropertySOCKSProxyPort: port
+          ]
+          if #available(iOSApplicationExtension 13.0, *), #available(iOS 13.0, *) {
+            cfg.tlsMaximumSupportedProtocolVersion = .TLSv12
+          } else {
+            cfg.tlsMinimumSupportedProtocol = .tlsProtocol12
+          }
+        case "HTTP":
+          cfg.connectionProxyDictionary = [
             kCFNetworkProxiesHTTPEnable: 1,
             kCFNetworkProxiesHTTPProxy: host,
             kCFNetworkProxiesHTTPPort:  port,
             kCFStreamPropertyHTTPSProxyHost: host,
             kCFStreamPropertyHTTPSProxyPort: port
-        ]
-        return URLSession.init(configuration: cfg)
-      default: return URLSession.shared
+          ]
+          default: return URLSession.shared
+      }
+      let newSession = URLSession.init(configuration: cfg)
+      sessionMap["\(host)\(port)\(proto)"] = newSession
+      return newSession
     }
   }
     
