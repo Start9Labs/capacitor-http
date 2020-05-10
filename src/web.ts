@@ -49,7 +49,7 @@ export class HttpPluginNative extends WebPlugin implements HttpPluginContract {
     if (res.headers['Content-Type'].includes('application/json')) {
       res.data = JSON.parse(res.data)
     }
-    if (res.status - 200 > 100) {
+    if (res.status < 200 || res.status > 299) {
       return Promise.reject(res)
     }
     return res
