@@ -45,7 +45,14 @@ export class HttpPluginNative extends WebPlugin implements HttpPluginContract {
   }
 
   async request(options: HttpOptions): Promise<HttpResponse> {
-    return HttpPlugin.request(options)
+    const res: HttpResponse = await HttpPlugin.request(options)
+    if (res.headers['Content-Type'].includes('application/json')) {
+      res.data = JSON.parse(res.data)
+    }
+    if (res.status < 200 || res.status > 299) {
+      return Promise.reject(res)
+    }
+    return res
   }
   async setCookie(options: HttpSetCookieOptions): Promise<void> {
     return HttpPlugin.setCookie(options)
