@@ -10,7 +10,6 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
@@ -166,143 +165,6 @@ public class HttpPlugin extends Plugin {
         return (HttpURLConnection) url.openConnection();
     }
 
-
-//    @SuppressWarnings("unused")
-//    @PluginMethod()
-//    public void downloadFile(PluginCall call) {
-//        try {
-//            saveCall(call);
-//            String urlString = call.getString("url");
-//            String filePath = call.getString("filePath");
-//            String fileDirectory = call.getString("fileDirectory", FilesystemUtils.DIRECTORY_DOCUMENTS);
-//            JSObject headers = call.getObject("headers");
-//
-//            Integer connectTimeout = call.getInt("connectTimeout");
-//            Integer readTimeout = call.getInt("readTimeout");
-//
-//            URL url = new URL(urlString);
-//
-//            if (!FilesystemUtils.isPublicDirectory(fileDirectory)
-//                    || isStoragePermissionGranted(PluginRequestCodes.HTTP_REQUEST_DOWNLOAD_WRITE_PERMISSIONS, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-//                this.freeSavedCall();
-//
-//                File file = FilesystemUtils.getFileObject(getContext(), filePath, fileDirectory);
-//
-//                HttpURLConnection conn = makeUrlConnection(call, url, "GET", connectTimeout, readTimeout, headers);
-//
-//                InputStream is = conn.getInputStream();
-//
-//                FileOutputStream fos = new FileOutputStream(file, false);
-//
-//                byte[] buffer = new byte[1024];
-//                int len;
-//
-//                while ((len = is.read(buffer)) > 0) {
-//                    fos.write(buffer, 0, len);
-//                }
-//
-//                is.close();
-//                fos.close();
-//
-//                call.resolve(new JSObject() {{
-//                    put("path", file.getAbsolutePath());
-//                }});
-//            }
-//        } catch (MalformedURLException ex) {
-//            call.reject("Invalid URL", ex);
-//        } catch (IOException ex) {
-//            call.reject("Error", ex);
-//        } catch (Exception ex) {
-//            call.reject("Error", ex);
-//        }
-//    }
-//
-//    private boolean isStoragePermissionGranted(int permissionRequestCode, String permission) {
-//        if (hasPermission(permission)) {
-//            Log.v(getLogTag(),"Permission '" + permission + "' is granted");
-//            return true;
-//        } else {
-//            Log.v(getLogTag(),"Permission '" + permission + "' denied. Asking user for it.");
-//            pluginRequestPermissions(new String[] {permission}, permissionRequestCode);
-//            return false;
-//        }
-//    }
-
-//    @Override
-//    protected void handleRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-//        super.handleRequestPermissionsResult(requestCode, permissions, grantResults);
-//
-//        if (getSavedCall() == null) {
-//            Log.d(getLogTag(),"No stored plugin call for permissions request result");
-//            return;
-//        }
-//
-//        PluginCall savedCall = getSavedCall();
-//
-//        for (int i = 0; i < grantResults.length; i++) {
-//            int result = grantResults[i];
-//            String perm = permissions[i];
-//            if(result == PackageManager.PERMISSION_DENIED) {
-//                Log.d(getLogTag(), "User denied storage permission: " + perm);
-//                savedCall.error("User denied write permission needed to save files");
-//                this.freeSavedCall();
-//                return;
-//            }
-//        }
-//
-//        this.freeSavedCall();
-//
-//        // Run on background thread to avoid main-thread network requests
-//        final Http httpPlugin = this;
-//        bridge.execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (requestCode == PluginRequestCodes.HTTP_REQUEST_DOWNLOAD_WRITE_PERMISSIONS) {
-//                    httpPlugin.downloadFile(savedCall);
-//                } else if (requestCode == PluginRequestCodes.HTTP_REQUEST_UPLOAD_READ_PERMISSIONS) {
-//                    httpPlugin.uploadFile(savedCall);
-//                }
-//            }
-//        });
-//    }
-
-
-//    @SuppressWarnings("unused")
-//    @PluginMethod()
-//    public void uploadFile(PluginCall call) {
-//        String urlString = call.getString("url");
-//        String filePath = call.getString("filePath");
-//        String fileDirectory = call.getString("fileDirectory", FilesystemUtils.DIRECTORY_DOCUMENTS);
-//        String name = call.getString("name", "file");
-//        Integer connectTimeout = call.getInt("connectTimeout");
-//        Integer readTimeout = call.getInt("readTimeout");
-//        JSObject headers = call.getObject("headers");
-//        JSObject params = call.getObject("params");
-//        JSObject data = call.getObject("data");
-//
-//        try {
-//            saveCall(call);
-//            URL url = new URL(urlString);
-//
-//            if (!FilesystemUtils.isPublicDirectory(fileDirectory)
-//                    || isStoragePermissionGranted(PluginRequestCodes.HTTP_REQUEST_UPLOAD_READ_PERMISSIONS, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-//                this.freeSavedCall();
-//                File file = FilesystemUtils.getFileObject(getContext(), filePath, fileDirectory);
-//
-//                HttpURLConnection conn = makeUrlConnection(call, url, "POST", connectTimeout, readTimeout, headers);
-//                conn.setDoOutput(true);
-//
-//                FormUploader builder = new FormUploader(conn);
-//                builder.addFilePart(name, file);
-//                builder.finish();
-//
-//                buildResponse(call, conn);
-//            }
-//        } catch (Exception ex) {
-//            call.reject("Error", ex);
-//        }
-//    }
-
     @SuppressWarnings("unused")
     @PluginMethod()
     public void setCookie(PluginCall call) {
@@ -400,7 +262,7 @@ public class HttpPlugin extends Plugin {
 
         ret.put("data", builder.toString());
 
-        call.resolve(ret);
+        return ret;
     }
 
     private JSArray makeResponseHeaders(HttpURLConnection conn) {
