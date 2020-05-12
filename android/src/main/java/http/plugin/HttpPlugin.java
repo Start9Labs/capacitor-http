@@ -265,21 +265,16 @@ public class HttpPlugin extends Plugin {
         return ret;
     }
 
-    private JSArray makeResponseHeaders(HttpURLConnection conn) {
-        JSArray ret = new JSArray();
+    private JSObject makeResponseHeaders(HttpURLConnection conn) {
+        JSObject ret = new JSObject();
 
         for (Map.Entry<String, List<String>> entries : conn.getHeaderFields().entrySet()) {
-            JSObject header = new JSObject();
-
-            String val = "";
-            for (String headerVal : entries.getValue()) {
-                val += headerVal + ", ";
+            JSArray val = new JSArray();
+            for (String v : entries.getValue()) {
+                val.put(v);
             }
-
-            header.put(entries.getKey(), val);
-            ret.put(header);
+            ret.put(entries.getKey(), val);
         }
-
         return ret;
     }
 

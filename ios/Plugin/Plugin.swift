@@ -210,8 +210,6 @@ public class HttpPlugin: CAPPlugin {
     ret["status"] = response.statusCode
     ret["headers"] = response.allHeaderFields
     
-    let contentType = response.allHeaderFields["Content-Type"] as? String
-
     if (data != nil) {
       ret["data"] = String(data: data!, encoding: .utf8);
     } else {
