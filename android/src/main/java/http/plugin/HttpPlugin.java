@@ -269,10 +269,7 @@ public class HttpPlugin extends Plugin {
         JSObject ret = new JSObject();
 
         for (Map.Entry<String, List<String>> entries : conn.getHeaderFields().entrySet()) {
-            JSArray val = new JSArray();
-            for (String v : entries.getValue()) {
-                val.put(v);
-            }
+            String val = String.join(", ", entries.getValue());
             ret.put(entries.getKey(), val);
         }
         return ret;
