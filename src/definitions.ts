@@ -43,7 +43,7 @@ export interface HttpParams {
 }
 
 export interface HttpHeaders {
-  [key: string]: string;
+  [key: string]: [string];
 }
 
 export interface HttpResponse {
