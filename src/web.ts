@@ -46,7 +46,8 @@ export class HttpPluginNative extends WebPlugin implements HttpPluginContract {
 
   async request(options: HttpOptions): Promise<HttpResponse> {
     const res: HttpResponse = await HttpPlugin.request(options)
-    if (res.headers['Content-Type'].includes('application/json')) {
+    const contentType = res.headers['Content-Type'] || res.headers['content-type']
+    if (contentType && contentType.includes('application/json')) {
       res.data = JSON.parse(res.data)
     }
     if (res.status < 200 || res.status > 299) {
