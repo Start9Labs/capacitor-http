@@ -96,14 +96,14 @@ public class HttpPlugin extends Plugin {
             } else {
                 qs.append("&");
             }
-            for (String param = null; params.hasNext();) {
-                param = params.next();
+            for (Iterator<String> paramKeys = params.keys(); paramKeys.hasNext();) {
+                String paramKey = paramKeys.next();
                 if (qs.length() > 1) {
                     qs.append("&");
                 }
-                qs.append(param);
+                qs.append(paramKey);
                 qs.append("=");
-                qs.append(params.getString(param));
+                qs.append(params.getString(paramKey));
             }
             url = new URL(urlString + qs.toString());
 
@@ -136,14 +136,14 @@ public class HttpPlugin extends Plugin {
             } else {
                 qs.append("&");
             }
-            for (String param = null; params.hasNext();) {
-                param = params.next();
+            for (Iterator<String> paramKeys = params.keys(); paramKeys.hasNext();) {
+                String paramKey = paramKeys.next();
                 if (qs.length() > 1) {
                     qs.append("&");
                 }
-                qs.append(param);
+                qs.append(paramKey);
                 qs.append("=");
-                qs.append(params.getString(param));
+                qs.append(params.getString(paramKey));
             }
             url = new URL(urlString + qs.toString());
 
