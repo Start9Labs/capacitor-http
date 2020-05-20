@@ -77,7 +77,8 @@ public class HttpPlugin extends Plugin {
         });
     }
 
-    private PluginCallResponseContent get(PluginCall call, String urlString, String method, JSObject headers, JSObject params) {
+    private PluginCallResponseContent get(PluginCall call, String urlString, String method, JSObject headers,
+            JSObject params) {
         try {
             Integer connectTimeout = call.getInt("connectTimeout");
             Integer readTimeout = call.getInt("readTimeout");
@@ -89,6 +90,22 @@ public class HttpPlugin extends Plugin {
             }
 
             URL url = new URL(urlString);
+            StringBuilder qs = new StringBuilder();
+            if (url.getQuery() == null) {
+                qs.append("?");
+            } else {
+                qs.append("&");
+            }
+            for (String param = null; params.hasNext();) {
+                param = params.next();
+                if (qs.length() > 1) {
+                    qs.append("&");
+                }
+                qs.append(param);
+                qs.append("=");
+                qs.append(params.getString(param));
+            }
+            url = new URL(urlString + qs.toString());
 
             HttpURLConnection conn = makeUrlConnection(call, url, method, connectTimeout, readTimeout, headers);
 
@@ -98,7 +115,6 @@ public class HttpPlugin extends Plugin {
             return PluginCallResponseContent.error(ex);
         }
     }
-
 
     private PluginCallResponseContent mutate(PluginCall call, String urlString, String method, JSObject headers) {
         try {
@@ -128,7 +144,8 @@ public class HttpPlugin extends Plugin {
         }
     }
 
-    private HttpURLConnection makeUrlConnection(PluginCall call, URL url, String method, Integer connectTimeout, Integer readTimeout, JSObject headers) throws Exception {
+    private HttpURLConnection makeUrlConnection(PluginCall call, URL url, String method, Integer connectTimeout,
+            Integer readTimeout, JSObject headers) throws Exception {
         HttpURLConnection conn = initUrlConnection(call, url);
 
         conn.setAllowUserInteraction(false);
@@ -153,12 +170,18 @@ public class HttpPlugin extends Plugin {
         Integer port = proxy.getInteger("port");
         String protocol = proxy.getString("protocol");
 
-        if(host != null && port != null){
+        if (host != null && port != null) {
             Proxy p;
             switch (protocol) {
-                case "SOCKS" : p = new Proxy(SOCKS, new InetSocketAddress(host, port)); break;
-                case "HTTP": p = new Proxy(HTTP, new InetSocketAddress(host, port)); break;
-                default: p = new Proxy(DIRECT, new InetSocketAddress(host, port)); break;
+                case "SOCKS":
+                    p = new Proxy(SOCKS, new InetSocketAddress(host, port));
+                    break;
+                case "HTTP":
+                    p = new Proxy(HTTP, new InetSocketAddress(host, port));
+                    break;
+                default:
+                    p = new Proxy(DIRECT, new InetSocketAddress(host, port));
+                    break;
             }
             return (HttpURLConnection) url.openConnection(p);
         }
@@ -222,7 +245,6 @@ public class HttpPlugin extends Plugin {
             return;
         }
 
-
         List<HttpCookie> cookies = cookieManager.getCookieStore().get(uri);
 
         for (HttpCookie cookie : cookies) {
@@ -284,7 +306,8 @@ public class HttpPlugin extends Plugin {
         }
     }
 
-    private void setRequestBody(HttpURLConnection conn, JSObject data, JSObject headers) throws IOException, JSONException {
+    private void setRequestBody(HttpURLConnection conn, JSObject data, JSObject headers)
+            throws IOException, JSONException {
         String contentType = conn.getRequestProperty("Content-Type");
 
         if (contentType != null) {
@@ -327,6 +350,7 @@ public class HttpPlugin extends Plugin {
             }
         }
     }
+
     private URI getUri(String url) {
         try {
             return new URI(url);
