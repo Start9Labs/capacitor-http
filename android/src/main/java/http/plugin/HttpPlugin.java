@@ -66,7 +66,7 @@ public class HttpPlugin extends Plugin {
                 case "POST":
                 case "PUT":
                     Log.i("HttpPlugin", "Finishing http " + method + " call to " + url);
-                    mutate(call, url, method, headers).respondTo(call);
+                    mutate(call, url, method, headers, params).respondTo(call);
                     return;
                 case "GET":
                 case "HEAD":
@@ -116,7 +116,8 @@ public class HttpPlugin extends Plugin {
         }
     }
 
-    private PluginCallResponseContent mutate(PluginCall call, String urlString, String method, JSObject headers) {
+    private PluginCallResponseContent mutate(PluginCall call, String urlString, String method, JSObject headers,
+            JSObject params) {
         try {
             Integer connectTimeout = call.getInt("connectTimeout");
             Integer readTimeout = call.getInt("readTimeout");
@@ -129,6 +130,22 @@ public class HttpPlugin extends Plugin {
             }
 
             URL url = new URL(urlString);
+            StringBuilder qs = new StringBuilder();
+            if (url.getQuery() == null) {
+                qs.append("?");
+            } else {
+                qs.append("&");
+            }
+            for (String param = null; params.hasNext();) {
+                param = params.next();
+                if (qs.length() > 1) {
+                    qs.append("&");
+                }
+                qs.append(param);
+                qs.append("=");
+                qs.append(params.getString(param));
+            }
+            url = new URL(urlString + qs.toString());
 
             HttpURLConnection conn = makeUrlConnection(call, url, method, connectTimeout, readTimeout, headers);
 
