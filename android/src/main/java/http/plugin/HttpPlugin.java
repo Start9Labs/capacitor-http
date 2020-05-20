@@ -280,28 +280,50 @@ public class HttpPlugin extends Plugin {
         call.resolve();
     }
 
-    private JSObject buildResponse(HttpURLConnection conn) throws Exception {
-        int statusCode = conn.getResponseCode();
+    private JSObject buildResponse(HttpURLConnection conn) throws IOException {
+        try {
+            int code = conn.getResponseCode();
+            JSObject headers = makeResponseHeaders(conn);
+            InputStream stream = conn.getInputStream();
 
-        JSObject ret = new JSObject();
-        ret.put("status", statusCode);
-        ret.put("headers", makeResponseHeaders(conn));
+            BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+            StringBuilder builder = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) {
+                builder.append(line);
+            }
+            in.close();
 
-        InputStream stream = conn.getInputStream();
+            JSObject ret = new JSObject();
+            ret.put("status", code);
+            ret.put("headers", headers);
+            ret.put("data", builder.toString());
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(stream));
-        StringBuilder builder = new StringBuilder();
-        String line;
-        while ((line = in.readLine()) != null) {
-            builder.append(line);
+            return ret;
+        } catch (IOException e) {
+            Log.e("HttpClient", "Errored in response: " + e.getMessage(), e);
+            int code = 500;
+            JSObject headers = makeResponseHeaders(conn);
+            InputStream stream = conn.getErrorStream();
+            try {
+                code = conn.getResponseCode();
+            } catch (Exception _) {}
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+            StringBuilder builder = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) {
+                builder.append(line);
+            }
+            in.close();
+
+            JSObject ret = new JSObject();
+            ret.put("status", code);
+            ret.put("headers", headers);
+            ret.put("data", builder.toString());
+
+            return ret;
         }
-        in.close();
-
-        Log.d(getLogTag(), "GET request completed, got data");
-
-        ret.put("data", builder.toString());
-
-        return ret;
     }
 
     private JSObject makeResponseHeaders(HttpURLConnection conn) {
