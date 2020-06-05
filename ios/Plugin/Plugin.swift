@@ -210,12 +210,19 @@ public class HttpPlugin: CAPPlugin {
     ret["status"] = response.statusCode
     ret["headers"] = response.allHeaderFields
     
-    if (data != nil) {
-      ret["data"] = String(data: data!, encoding: .utf8);
-    } else {
-      ret["data"] = ""
-    }
     
+    switch response.allHeaderFields["Content-Type"] as? String {
+    case .some("application/octet-stream"):
+        if data != nil {
+            ret["data"] = String(data: data!.base64EncodedData(), encoding: .utf8)
+        }
+    default:
+        if (data != nil) {
+          ret["data"] = String(data: data!, encoding: .utf8)
+        } else {
+          ret["data"] = ""
+        }
+    }
     return ret
   }
   

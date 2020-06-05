@@ -1,6 +1,9 @@
 package http.plugin;
 
 import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 import java.util.concurrent.Executors;
 
 import com.getcapacitor.JSArray;
@@ -26,6 +29,7 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -286,18 +290,24 @@ public class HttpPlugin extends Plugin {
             JSObject headers = makeResponseHeaders(conn);
             InputStream stream = conn.getInputStream();
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(stream));
-            StringBuilder builder = new StringBuilder();
-            String line;
-            while ((line = in.readLine()) != null) {
-                builder.append(line);
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int nRead;
+            byte[] data = new byte[16384];
+            while ((nRead = stream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
             }
-            in.close();
+            byte[] responseBody = buffer.toByteArray();
 
             JSObject ret = new JSObject();
             ret.put("status", code);
             ret.put("headers", headers);
-            ret.put("data", builder.toString());
+            String contentType = headers.getString("Content-Type");
+            if (contentType != null && contentType.contains("application/octet-stream")) {
+                byte[] encoded = Base64.getEncoder().encode(responseBody);
+                ret.put("data", new String(encoded, StandardCharsets.UTF_8));
+            } else {
+                ret.put("data", new String(responseBody, StandardCharsets.UTF_8));
+            }
 
             return ret;
         } catch (IOException e) {

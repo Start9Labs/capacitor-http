@@ -1,13 +1,15 @@
-import { WebPlugin, Plugins } from '@capacitor/core';
-import { HttpPluginContract,
-         HttpOptions,
-         HttpResponse,
-         HttpSetCookieOptions,
-         HttpGetCookiesOptions,
-         HttpGetCookiesResult,
-         HttpDeleteCookieOptions, 
-         HttpClearCookiesOptions 
-        } from './definitions';
+import { WebPlugin, Plugins } from '@capacitor/core'
+import {
+  HttpPluginContract,
+  HttpOptions,
+  HttpResponse,
+  HttpSetCookieOptions,
+  HttpGetCookiesOptions,
+  HttpGetCookiesResult,
+  HttpDeleteCookieOptions,
+  HttpClearCookiesOptions
+} from './definitions'
+import * as b64 from 'base64-arraybuffer'
 const { HttpPlugin } = Plugins
 
 
@@ -49,6 +51,8 @@ export class HttpPluginNative extends WebPlugin implements HttpPluginContract {
     const contentType = res.headers['Content-Type'] || res.headers['content-type']
     if (contentType && contentType.includes('application/json')) {
       res.data = JSON.parse(res.data)
+    } else if (contentType && contentType.includes('application/octet-stream')) {
+      res.data = b64.decode(res.data)
     }
     if (res.status < 200 || res.status > 299) {
       return Promise.reject(res)
