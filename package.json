@@ -1,5 +1,5 @@
 {
-  "name": "capacitor-s9-http",
+  "name": "@start9labs/capacitor-http",
   "version": "0.1.",
   "description": "http plugin with socks + http proxy support",
   "author": "Start9 Labs, LLC",
