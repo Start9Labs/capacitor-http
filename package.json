@@ -1,7 +1,10 @@
 {
-  "name": "capacitor-http",
-  "version": "0.0.2",
+  "name": "capacitor-s9-http",
+  "version": "0.1.",
   "description": "http plugin with socks + http proxy support",
+  "author": "Start9 Labs, LLC",
+  "homepage": "https://start9labs.com",
+  "license": "MIT",
   "main": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "scripts": {
@@ -10,8 +13,6 @@
     "watch": "tsc --watch",
     "prepublishOnly": "npm run build"
   },
-  "author": "AG + KM",
-  "license": "MIT",
   "dependencies": {
     "@capacitor/core": "latest"
   },
