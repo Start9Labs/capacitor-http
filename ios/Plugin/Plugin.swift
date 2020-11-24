@@ -140,7 +140,7 @@ public class HttpPlugin: CAPPlugin {
 
     let task = acquireSession(call).dataTask(with: request) { (data, response, error) in
       if error != nil {
-        call.reject("Error: (String(describing: error))", nil, error, [:])
+        call.reject("CapHTTP Error: \(String(describing: error))", nil, error, [:])
         return
       }
       
@@ -191,7 +191,7 @@ public class HttpPlugin: CAPPlugin {
 
     let task = acquireSession(call).dataTask(with: request) { (data, response, error) in
       if error != nil {
-        call.reject("Error: (String(describing: error))", nil, error, [:])
+        call.reject("CapHTTP Error: \(String(describing: error))", nil, error, [:])
         return
       }
       
