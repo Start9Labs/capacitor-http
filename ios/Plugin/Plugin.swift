@@ -17,9 +17,9 @@ public class HttpPlugin: CAPPlugin {
       return call.reject("Must provide a method. One of GET, DELETE, HEAD PATCH, POST, or PUT")
     }
     
-    let headers = (call.getObject("headers") ?? [:]) as [String:String]
+    let headers = (call.getObject("headers") ?? [:]) as! [String:String]
     
-    let params = (call.getObject("params") ?? [:]) as [String:String]
+    let params = (call.getObject("params") ?? [:]) as! [String:String]
     
     guard var url = URL(string: urlValue) else {
       return call.reject("Invalid URL")
@@ -140,7 +140,7 @@ public class HttpPlugin: CAPPlugin {
 
     let task = acquireSession(call).dataTask(with: request) { (data, response, error) in
       if error != nil {
-        call.reject("Error", nil, error, [:])
+        call.reject("Error: (String(describing: error))", nil, error, [:])
         return
       }
       
@@ -191,7 +191,7 @@ public class HttpPlugin: CAPPlugin {
 
     let task = acquireSession(call).dataTask(with: request) { (data, response, error) in
       if error != nil {
-        call.reject("Error", nil, error, [:])
+        call.reject("Error: (String(describing: error))", nil, error, [:])
         return
       }
       
