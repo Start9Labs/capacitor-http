@@ -324,6 +324,7 @@ public class HttpPlugin extends Plugin {
 
             return ret;
         } catch (IOException e) {
+            String eMessage = e.getMessage();
             Log.e("HttpClient", "Errored in response: " + e.getMessage(), e);
             int code = 500;
             JSObject headers = makeResponseHeaders(conn);
@@ -332,18 +333,23 @@ public class HttpPlugin extends Plugin {
                 code = conn.getResponseCode();
             } catch (Exception _) {}
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(stream));
-            StringBuilder builder = new StringBuilder();
-            String line;
-            while ((line = in.readLine()) != null) {
-                builder.append(line);
-            }
-            in.close();
+            String data = "";
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+                StringBuilder builder = new StringBuilder();
+                String line;
+                while ((line = in.readLine()) != null) {
+                    builder.append(line);
+                }
+                in.close();
+                data = builder.toString();
+            } catch (Exception _) {}
 
             JSObject ret = new JSObject();
             ret.put("status", code);
             ret.put("headers", headers);
-            ret.put("data", builder.toString());
+            ret.put("eMessage", eMessage);
+            ret.put("data", data);
 
             return ret;
         }
