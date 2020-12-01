@@ -50,8 +50,15 @@ export class HttpPluginNative extends WebPlugin implements HttpPluginContract {
     if (contentType && contentType.includes('application/json')) {
       res.data = JSON.parse(res.data)
     }
+
     if (res.status < 200 || res.status > 299) {
-      return Promise.reject(res)
+      if(res instanceof Error) {
+        return Promise.reject(res)
+      } else if (typeof res === 'object') {
+        return Promise.reject(new Error(JSON.stringify(res)))
+      } else {
+        return Promise.reject(new Error(res))
+      }
     }
     return res
   }
