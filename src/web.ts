@@ -45,16 +45,25 @@ export class HttpPluginNative extends WebPlugin implements HttpPluginContract {
   }
 
   async request(options: HttpOptions): Promise<HttpResponse> {
-    const res: HttpResponse = await HttpPlugin.request(options)
+    let res: HttpResponse
+    try {
+      res = await HttpPlugin.request(options)
+    } catch(e) {
+      console.error('Plugin Native Error', e)
+      throw toError(e)
+    }
+
     const contentType = res.headers['Content-Type'] || res.headers['content-type']
     if (contentType && contentType.includes('application/json')) {
       res.data = JSON.parse(res.data)
     }
+
     if (res.status < 200 || res.status > 299) {
-      return Promise.reject(res)
+      throw toError(res)
     }
     return res
   }
+
   async setCookie(options: HttpSetCookieOptions): Promise<void> {
     return HttpPlugin.setCookie(options)
   }
@@ -66,6 +75,16 @@ export class HttpPluginNative extends WebPlugin implements HttpPluginContract {
   }
   async clearCookies(options: HttpClearCookiesOptions): Promise<void> {
     return HttpPlugin.clearCookies(options)
+  }
+}
+
+function toError(e: any): Error {
+  if(e instanceof Error) {
+    return e
+  } else if (typeof e === 'object') {
+    return new Error(JSON.stringify(e))
+  } else {
+    return new Error(e)
   }
 }
 
